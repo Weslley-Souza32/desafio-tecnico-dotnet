@@ -26,6 +26,16 @@ namespace DesafioTecnico.Console.Services
 
         public MovimentacaoEstoque MovimentarEstoque(Produto produto, TipoMovimentacao tipo, int quantidade, string descricao)
         {
+            if (quantidade <= 0)
+            {
+                throw new ArgumentException("A quantidade deve ser maior que zero.", nameof(quantidade));
+            }
+
+            if (tipo == TipoMovimentacao.Saida && quantidade > produto.Estoque)
+            {
+                throw new InvalidOperationException("A quantidade de saída não pode ser maior que o estoque disponível.");
+            }
+
             if (tipo == TipoMovimentacao.Entrada)
                 produto.Estoque += quantidade;
 
