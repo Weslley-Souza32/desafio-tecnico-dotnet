@@ -30,7 +30,7 @@ namespace DesafioTecnico.Console.Services
             return valorVenda * 0.05m;
         }
 
-        public Dictionary<string, decimal> CalcularComissaoPorVendendor(List<Venda> vendas)
+        public Dictionary<string, decimal> CalcularComissaoPorVendedor(List<Venda> vendas)
         {
             var commisaoPorVendedor = vendas
                 .GroupBy(v => v.Vendedor)
