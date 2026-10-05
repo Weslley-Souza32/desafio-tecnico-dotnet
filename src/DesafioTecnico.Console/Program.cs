@@ -1,45 +1,106 @@
-﻿using DesafioTecnico.Console.Services;
-
-Console.WriteLine("Desafio Técnico .NET");
-
-VendaService vendaService = new();
-
-string caminhoArquivo = Path.Combine(
-    AppContext.BaseDirectory,
-    "Data",
-    "vendas.json"
-);
-
-var dados = vendaService.CarregarVendas(caminhoArquivo);
-
-var comissoes = vendaService.CalcularComissaoPorVendendor(dados.Vendas);
-
-Console.WriteLine("========================================");
-Console.WriteLine("       COMISSÃO DOS VENDEDORES");
-Console.WriteLine("========================================");
-Console.WriteLine();
-
-foreach (var item in comissoes)
-{
-    Console.WriteLine($"Vendedor: {item.Key} | Comissão: {item.Value:C2}");
-}
-
+﻿using DesafioTecnico.Console.Models;
+using DesafioTecnico.Console.Services;
 
 EstoqueService estoqueService = new();
 
-string caminhoArquivoEstoque = Path.Combine(
+string caminhoArquivo = Path.Combine(
     AppContext.BaseDirectory,
     "Data",
     "estoque.json"
 );
 
-var dadosEstoque = estoqueService.CarregarEstoque(caminhoArquivoEstoque);
+var dados = estoqueService.CarregarEstoque(caminhoArquivo);
 
-Console.WriteLine($"Quantidade de produtos carregados: {dadosEstoque.Estoque.Count}");
+Console.WriteLine("========================================");
+Console.WriteLine("          MOVIMENTAÇÃO DE ESTOQUE");
+Console.WriteLine("========================================");
+Console.WriteLine();
 
-foreach (var produto in dadosEstoque.Estoque)
+Console.WriteLine("Produtos disponíveis:");
+Console.WriteLine();
+
+foreach (var produto in dados.Estoque)
 {
     Console.WriteLine(
         $"{produto.CodigoProduto} - {produto.DescricaoProduto} - Estoque: {produto.Estoque}"
     );
+}
+
+Console.WriteLine();
+Console.Write("Informe o código do produto: ");
+
+if (!int.TryParse(Console.ReadLine(), out int codigoProduto))
+{
+    Console.WriteLine("Código de produto inválido.");
+    return;
+}
+
+Produto? produtoSelecionado = estoqueService.BuscarProdutoPorCodigo(
+    dados.Estoque,
+    codigoProduto
+);
+
+if (produtoSelecionado is null)
+{
+    Console.WriteLine("Produto não encontrado.");
+    return;
+}
+
+Console.WriteLine();
+Console.WriteLine("Tipo da movimentação:");
+Console.WriteLine("1 - Entrada");
+Console.WriteLine("2 - Saída");
+Console.Write("Escolha uma opção: ");
+
+if (!int.TryParse(Console.ReadLine(), out int tipoInformado))
+{
+    Console.WriteLine("Tipo de movimentação inválido.");
+    return;
+}
+
+if (!Enum.IsDefined(typeof(TipoMovimentacao), tipoInformado))
+{
+    Console.WriteLine("Tipo de movimentação inválido.");
+    return;
+}
+
+TipoMovimentacao tipo = (TipoMovimentacao)tipoInformado;
+
+Console.Write("Informe a quantidade: ");
+
+if (!int.TryParse(Console.ReadLine(), out int quantidade))
+{
+    Console.WriteLine("Quantidade inválida.");
+    return;
+}
+
+Console.Write("Informe uma descrição para a movimentação: ");
+
+string descricao = Console.ReadLine() ?? string.Empty;
+
+try
+{
+    MovimentacaoEstoque movimentacao = estoqueService.MovimentarEstoque(
+        produtoSelecionado,
+        tipo,
+        quantidade,
+        descricao
+    );
+
+    Console.WriteLine();
+    Console.WriteLine("Movimentação realizada com sucesso.");
+    Console.WriteLine($"Id: {movimentacao.Id}");
+    Console.WriteLine($"Produto: {produtoSelecionado.DescricaoProduto}");
+    Console.WriteLine($"Tipo: {movimentacao.Tipo}");
+    Console.WriteLine($"Quantidade: {movimentacao.Quantidade}");
+    Console.WriteLine($"Descrição: {movimentacao.Descricao}");
+    Console.WriteLine($"Estoque final: {produtoSelecionado.Estoque}");
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Erro: {ex.Message}");
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine($"Erro: {ex.Message}");
 }
