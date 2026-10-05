@@ -23,3 +23,23 @@ foreach (var item in comissoes)
 {
     Console.WriteLine($"Vendedor: {item.Key} | Comissão: {item.Value:C2}");
 }
+
+
+EstoqueService estoqueService = new();
+
+string caminhoArquivoEstoque = Path.Combine(
+    AppContext.BaseDirectory,
+    "Data",
+    "estoque.json"
+);
+
+var dadosEstoque = estoqueService.CarregarEstoque(caminhoArquivoEstoque);
+
+Console.WriteLine($"Quantidade de produtos carregados: {dadosEstoque.Estoque.Count}");
+
+foreach (var produto in dadosEstoque.Estoque)
+{
+    Console.WriteLine(
+        $"{produto.CodigoProduto} - {produto.DescricaoProduto} - Estoque: {produto.Estoque}"
+    );
+}
