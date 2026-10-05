@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/DesafioTecnico.Console/DesafioTecnico.Console.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DesafioTecnico.Tests/DesafioTecnico.Tests.csproj" Id="070e4818-ca0d-4f12-9eb8-ed197a09cf0b" />
+  </Folder>
 </Solution>
