@@ -1,106 +1,58 @@
-﻿using DesafioTecnico.Console.Models;
-using DesafioTecnico.Console.Services;
+﻿using DesafioTecnico.Console.Services;
 
-EstoqueService estoqueService = new();
-
-string caminhoArquivo = Path.Combine(
-    AppContext.BaseDirectory,
-    "Data",
-    "estoque.json"
-);
-
-var dados = estoqueService.CarregarEstoque(caminhoArquivo);
+JurosService jurosService = new();
 
 Console.WriteLine("========================================");
-Console.WriteLine("          MOVIMENTAÇÃO DE ESTOQUE");
+Console.WriteLine("         CÁLCULO DE JUROS POR ATRASO");
 Console.WriteLine("========================================");
 Console.WriteLine();
 
-Console.WriteLine("Produtos disponíveis:");
-Console.WriteLine();
+Console.Write("Informe o valor original: R$ ");
 
-foreach (var produto in dados.Estoque)
+if (!decimal.TryParse(Console.ReadLine(), out decimal valor))
 {
-    Console.WriteLine(
-        $"{produto.CodigoProduto} - {produto.DescricaoProduto} - Estoque: {produto.Estoque}"
-    );
-}
-
-Console.WriteLine();
-Console.Write("Informe o código do produto: ");
-
-if (!int.TryParse(Console.ReadLine(), out int codigoProduto))
-{
-    Console.WriteLine("Código de produto inválido.");
+    Console.WriteLine("Valor inválido.");
     return;
 }
 
-Produto? produtoSelecionado = estoqueService.BuscarProdutoPorCodigo(
-    dados.Estoque,
-    codigoProduto
+Console.Write("Informe a data de vencimento (dd/MM/yyyy): ");
+
+if (!DateTime.TryParse(
+    Console.ReadLine(),
+    out DateTime dataVencimento))
+{
+    Console.WriteLine("Data de vencimento inválida.");
+    return;
+}
+
+DateTime dataAtual = DateTime.Today;
+
+int diasEmAtraso = 0;
+
+if (dataAtual.Date > dataVencimento.Date)
+{
+    diasEmAtraso = (dataAtual.Date - dataVencimento.Date).Days;
+}
+
+decimal juros = jurosService.CalcularJuros(
+    valor,
+    dataVencimento,
+    dataAtual
 );
 
-if (produtoSelecionado is null)
-{
-    Console.WriteLine("Produto não encontrado.");
-    return;
-}
+decimal valorAtualizado = jurosService.CalcularValorAtualizado(
+    valor,
+    juros
+);
 
 Console.WriteLine();
-Console.WriteLine("Tipo da movimentação:");
-Console.WriteLine("1 - Entrada");
-Console.WriteLine("2 - Saída");
-Console.Write("Escolha uma opção: ");
+Console.WriteLine("========================================");
+Console.WriteLine("              RESULTADO");
+Console.WriteLine("========================================");
 
-if (!int.TryParse(Console.ReadLine(), out int tipoInformado))
-{
-    Console.WriteLine("Tipo de movimentação inválido.");
-    return;
-}
-
-if (!Enum.IsDefined(typeof(TipoMovimentacao), tipoInformado))
-{
-    Console.WriteLine("Tipo de movimentação inválido.");
-    return;
-}
-
-TipoMovimentacao tipo = (TipoMovimentacao)tipoInformado;
-
-Console.Write("Informe a quantidade: ");
-
-if (!int.TryParse(Console.ReadLine(), out int quantidade))
-{
-    Console.WriteLine("Quantidade inválida.");
-    return;
-}
-
-Console.Write("Informe uma descrição para a movimentação: ");
-
-string descricao = Console.ReadLine() ?? string.Empty;
-
-try
-{
-    MovimentacaoEstoque movimentacao = estoqueService.MovimentarEstoque(
-        produtoSelecionado,
-        tipo,
-        quantidade,
-        descricao
-    );
-
-    Console.WriteLine();
-    Console.WriteLine("Movimentação realizada com sucesso.");
-    Console.WriteLine($"Id: {movimentacao.Id}");
-    Console.WriteLine($"Produto: {produtoSelecionado.DescricaoProduto}");
-    Console.WriteLine($"Tipo: {movimentacao.Tipo}");
-    Console.WriteLine($"Quantidade: {movimentacao.Quantidade}");
-    Console.WriteLine($"Descrição: {movimentacao.Descricao}");
-    Console.WriteLine($"Estoque final: {produtoSelecionado.Estoque}");
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Erro: {ex.Message}");
-}
-catch (InvalidOperationException ex)
-{
-    Console.WriteLine($"Erro: {ex.Message}");
-}
+Console.WriteLine($"Valor original: {valor:C2}");
+Console.WriteLine($"Data de vencimento: {dataVencimento:dd/MM/yyyy}");
+Console.WriteLine($"Data atual: {dataAtual:dd/MM/yyyy}");
+Console.WriteLine($"Dias em atraso: {diasEmAtraso}");
+Console.WriteLine($"Juros: {juros:C2}");
+Console.WriteLine($"Valor atualizado: {valorAtualizado:C2}");
